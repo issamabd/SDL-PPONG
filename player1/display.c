@@ -1,5 +1,5 @@
+#include <SDL/SDL_image.h>
 #include "display.h"
-#include "game.h"
 
 extern SDL_sem * semWrite, * semRead;
 

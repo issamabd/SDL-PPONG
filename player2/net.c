@@ -1,7 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -15,7 +13,7 @@ extern int csock;
 PPong_FIFO fifo1;
 extern SDL_sem * semWrite1, * semRead1;  
 
-int establish_connection()
+int establish_connection(char *ip, int port)
 {
    struct sockaddr_in client;
     
@@ -27,9 +25,9 @@ printf("Configuring the connexion ...\n");
 csock = socket(AF_INET, SOCK_STREAM, 0);
 
 /* Setting the address (port + IP @) of the server socket */     
-client.sin_addr.s_addr = inet_addr("127.0.0.1");
+client.sin_addr.s_addr = inet_addr(ip);
 client.sin_family = AF_INET;
-client.sin_port = htons(23);
+client.sin_port = htons(port);
 
 printf("Activating the connexion ...\n");
 

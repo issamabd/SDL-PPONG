@@ -20,13 +20,16 @@ Copyright (C) 2010-2016 Issam Abdallah, Tunisia
 Email:iabdallah@yandex.com
 Web Site: issamabd.com
 */
+
 #include <arpa/inet.h>
+#include <getopt.h>
 
 # include "display.h"
 # include "moveball.h"
 # include "net.h"
 
 static int SDLlibs_init();
+static void print_usage (char * program_name, FILE * stream, int exit_code);
 
 SDL_sem * semWrite, * semRead;
 extern int ssock, csock;
@@ -43,8 +46,48 @@ int main(int argc, char *argv[])
  game.p1 = &p1;
  game.p2 = &p2;
 
+ const char* const short_options = "hi:p:";
+ const struct option long_options[] = {
+     
+     {"help", 0, NULL, 'h'},  
+     {"ip", 1, NULL, 'i'},
+     {"port", 1, NULL, 'p'},
+     {NULL, 0, NULL, 0}
+      
+ };
 
- if(!establish_connection())
+ char * program_name = argv[0];
+ int next_option;
+ const char *port = NULL;
+ char *ip = NULL;
+
+ /* scan command options (refer to GNU getopt.h API) */
+ do{
+  next_option = getopt_long(argc, argv, short_options, long_options, NULL);   
+  switch(next_option)
+  {
+      case 'h': print_usage(program_name, stdout, EXIT_SUCCESS);
+      
+      case 'i': ip = (char *)optarg;
+      break;
+      
+      case 'p': port = optarg;
+      break;
+      
+      case '?': print_usage(program_name, stderr, EXIT_FAILURE);
+    
+      case -1:
+      break;
+      default: abort();
+  }
+}while(next_option != -1);
+ 
+/* verify that IP:PORT are scanned */
+if(!ip || !port)
+    print_usage(program_name, stderr, EXIT_FAILURE);
+
+/* Establish connection with player2 */
+ if(!establish_connection(ip, atoi(port)))
 	exit(EXIT_FAILURE);
 
 /* SDL initialisation */
@@ -52,7 +95,8 @@ if(!SDLlibs_init())
 	exit(EXIT_FAILURE);
 
 /* graphic Interface creation */
-game.screen            = SDL_SetVideoMode(660, 700, BITBIXEL, SDL_HWSURFACE | SDL_DOUBLEBUF /*| SDL_FULLSCREEN*/);
+game.screen     = SDL_SetVideoMode(660, 700, BITBIXEL,
+            SDL_HWSURFACE | SDL_DOUBLEBUF /*| SDL_FULLSCREEN*/);
 create_game_graphicItems(&game);
 set_graphicItems_positions(&game);
 
@@ -96,8 +140,8 @@ while(play)
 
 	                switch(event.key.keysym.sym)
 		        {
-
-			 case SDLK_RIGHT :     if( (game.table.rack1.position.x + game.table.rack1.surface->w)  < (game.table.table.surface->w -5))
+			 case SDLK_RIGHT :     if( (game.table.rack1.position.x + game.table.rack1.surface->w) 
+                                                        < (game.table.table.surface->w -5))
 						 game.table.rack1.position.x += RSPEED;
 		         break;
 
@@ -112,7 +156,6 @@ while(play)
 			 case SDLK_q:	play = 0;
                          break;
 
-
 			 default:
 			 break;
 		      }
@@ -123,7 +166,6 @@ while(play)
     }
 
 }
-
 
     SDL_RemoveTimer(timer);
 
@@ -154,7 +196,7 @@ while(play)
 }
 
 
-int SDLlibs_init()
+static int SDLlibs_init()
 {
 /* initialisation of SDL */
   if( SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1)
@@ -178,3 +220,13 @@ int SDLlibs_init()
 
 	return 1;
 }
+
+static void print_usage (char * program_name, FILE * stream, int exit_code)
+{
+    fprintf(stream, "Usage: %s [-i listen_address] [-p port]\n\n", program_name);
+    fprintf(stream, "  -h, --help\t\t Display this usage information.\n");
+    fprintf(stream, "  -i, --ip\t\t IP address on which to listen for connection.\n");
+    fprintf(stream, "  -p, --port\t\t Port number to use.\n");
+    exit(exit_code);
+}
+

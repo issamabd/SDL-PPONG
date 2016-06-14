@@ -32,7 +32,7 @@ int net(void * data)
  }
 }  
 
-int establish_connection()
+int establish_connection(char *ip, int port)
 {
  char buffer[32] = "ready ?";
  char sbuffer[32];
@@ -53,9 +53,9 @@ if (ssock < 0)
 else
 {
   /*Setting the address (port + IP @) of the server socket */
-  server.sin_addr.s_addr    = inet_addr("127.0.0.1"/*"192.168.1.7"*/);  /* IP @ of the server */ 
+  server.sin_addr.s_addr    = inet_addr(ip);  /* IP @ of the server */ 
   server.sin_family         = AF_INET;                  		/* Address format that goes with the internet mamespace (domain) */ 
-  server.sin_port           = htons(23);                		/* Port number : telnet protocol */            
+  server.sin_port           = htons(port);                		/* Port number : telnet protocol */            
                 
  /* Assigning the adress to the server socket */
  printf("Binding the adress to the server (player1) socket...\n");

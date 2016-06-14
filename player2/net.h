@@ -3,8 +3,8 @@
 
 #define closesocket(s) close(s)
 
-int establish_connection();
-int net(void * data);
+int establish_connection(char *ip, int port);
+int net(void * data); 
 
 void initialise_FIFO ();
 void free_FIFO();

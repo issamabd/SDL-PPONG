@@ -3,7 +3,8 @@
 
 #define closesocket(s) close(s)
 
-int establish_connection();
+int establish_connection(char *ip, int port);
 int net(void * data); 
 
-#endif
+#endif // NET_H
+
