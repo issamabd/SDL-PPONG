@@ -25,6 +25,7 @@ Web Site: issamabd.com
 
 #include "display.h"
 #include "net.h"
+#include "buffer.h"
 
 static int SDLlibs_init();
 static void print_usage (char * program_name, FILE * stream, int exit_code);
@@ -91,7 +92,8 @@ if(!establish_connection(ip, atoi(port)))
 if(!SDLlibs_init())
     exit(EXIT_FAILURE);
 
-initialise_FIFO ();
+initialise_Buffer (&game.buffer1); // ball positions
+initialise_Buffer (&game.buffer2); // Rack1 positions
 
 /* screen */
 game.screen   = SDL_SetVideoMode(660, 700, BITBIXEL, SDL_HWSURFACE | SDL_DOUBLEBUF /*| SDL_FULLSCREEN*/);
@@ -184,7 +186,9 @@ while(play)
     SDL_Quit();
 
     closesocket(csock);
-    free_FIFO();
+    
+    free_Buffer(&game.buffer1);
+    free_Buffer(&game.buffer2);
     
     return EXIT_SUCCESS;
 }

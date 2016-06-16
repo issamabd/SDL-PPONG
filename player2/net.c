@@ -10,7 +10,6 @@
 #include "game.h"
 
 extern int csock;
-PPong_FIFO fifo1;
 extern SDL_sem * semWrite1, * semRead1;  
 
 int establish_connection(char *ip, int port)
@@ -67,57 +66,33 @@ int net(void * data)
 {
  PPong_Game * game = (PPong_Game *)data;
  
- struct Node * tmp;
- SDL_Rect ball;
+ struct Node * tmp1, *tmp2;
+ SDL_Rect rack1_position, ball_position;
 
 while(*(game->play))
 {
 
+  tmp1 = (struct Node *)malloc(sizeof(struct Node));
+  tmp1->next = NULL;
+
+  tmp2 = (struct Node *)malloc(sizeof(struct Node));
+  tmp2->next = NULL;
+  
   send(csock, (SDL_Rect *)&game->table.rack2.position, sizeof(SDL_Rect), 0);
   recv(csock, (int *)game->p1, sizeof(int), 0);
   recv(csock, (int *)game->p2, sizeof(int), 0);
-  recv(csock, (SDL_Rect *)&ball, sizeof(SDL_Rect), 0);
-  recv(csock, (SDL_Rect *)&game->table.rack1.position, sizeof(SDL_Rect), 0);
+  recv(csock, (SDL_Rect *)&ball_position, sizeof(SDL_Rect), 0);
+  recv(csock, (SDL_Rect *)&rack1_position, sizeof(SDL_Rect), 0);
 
-  tmp = (struct Node *)malloc(sizeof(struct Node));
-  tmp->position = ball;
-  tmp->next = NULL;
+  SDL_SemWait(semWrite1); /* ++++++++++++++++++++++++++++++++ */
 
- SDL_SemWait(semWrite1); /* ++++++++++++++++++++++++++++++++ */
- 
-  if(fifo1.head == NULL)
-  {
-	fifo1.head = tmp;
-	fifo1.tail  = tmp;
-	fifo1.count++;
-  }
-  else
-  {
-        fifo1.tail->next = tmp;
-	fifo1.tail = tmp;      
-	fifo1.count++;
-  }
-
- SDL_SemPost(semRead1); /* ++++++++++++++++++++++++++++++++ */
+    tmp1->position = ball_position;
+    tmp2->position = rack1_position;
+  
+    add_Node (&game->buffer1, tmp1); // inline functions to ignore function-call overhead in a critical section!
+    add_Node (&game->buffer2, tmp2);
+  
+  SDL_SemPost(semRead1); /* ++++++++++++++++++++++++++++++++ */
 
 }
 } 
-
-void initialise_FIFO ()
-{
- fifo1.count = 0;
- fifo1.head = NULL;
- fifo1.tail = NULL;
-}
-
-void free_FIFO()
-{
-       struct Node* tmp;
-
-   while (fifo1.head != NULL)
-    {
-       tmp = fifo1.head;
-       fifo1.head = fifo1.head->next;
-       free(tmp);
-    }
-}

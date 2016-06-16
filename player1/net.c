@@ -9,6 +9,7 @@
 #include "net.h"
 #include "game.h"
 
+
 extern SDL_sem * semWrite, * semRead;
 int ssock, csock;
 
@@ -16,20 +17,39 @@ int net(void * data)
 {
 
  PPong_Game * game = (PPong_Game *)data;
-     
+ int p1, p2;
+ SDL_Rect ball_position, rack1_position, rack2_position;
+ 
+ struct Node * tmp = (struct Node *)malloc(sizeof(struct Node));
+   
  while(*(game->play))
  {
+     
+  recv(csock, (SDL_Rect *)&rack2_position, sizeof(SDL_Rect), 0);
+         
   SDL_SemWait(semWrite);/* ++++++++++++++++++++++++++++++++ */
 
-  	send(csock, (int *)game->p1, sizeof(int), 0);
-  	send(csock, (int *)game->p2, sizeof(int), 0);
-  	send(csock, (SDL_Rect *)&game->table.ball.position,  sizeof(SDL_Rect), 0);
-  	send(csock, (SDL_Rect *)&game->table.rack1.position, sizeof(SDL_Rect), 0);
-  	recv(csock, (SDL_Rect *)&game->table.rack2.position, sizeof(SDL_Rect), 0);
+    p1 = (*game->p1);
+    p2 = (*game->p2);
+    ball_position = game->table.ball.position;
+    rack1_position = game->table.rack1.position;
+    
+    tmp->position = rack2_position;
+    tmp->next = NULL;
 
+    add_Node (&game->buffer, tmp); // inline function ..
+    
   SDL_SemPost(semRead);/* ++++++++++++++++++++++++++++++++ */
-
+  
+  send(csock, (int *)&p1, sizeof(int), 0);
+  send(csock, (int *)&p2, sizeof(int), 0);
+  send(csock, (SDL_Rect *)&ball_position,  sizeof(SDL_Rect), 0);
+  send(csock, (SDL_Rect *)&rack1_position, sizeof(SDL_Rect), 0);
+  
  }
+ 
+ //free(tmp);
+ return 1; 
 }  
 
 int establish_connection(char *ip, int port)
@@ -115,3 +135,5 @@ else
  }
 }
 }
+
+

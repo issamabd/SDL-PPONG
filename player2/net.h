@@ -6,8 +6,5 @@
 int establish_connection(char *ip, int port);
 int net(void * data); 
 
-void initialise_FIFO ();
-void free_FIFO();
-
 #endif // NET_H
 

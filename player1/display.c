@@ -1,6 +1,7 @@
 #include <SDL/SDL_image.h>
 #include "display.h"
 
+
 extern SDL_sem * semWrite, * semRead;
 
 int create_game_graphicItems(PPong_Game * game)
@@ -120,6 +121,11 @@ int display(void * data)
   game->board.time.position.x = game->board.board.surface->w - game->board.time.surface->w -10;
   game->board.time.position.y = game->board.board.surface->h/2 - game->board.time.surface->h/2;
 
+  sprintf(p1_p2,"P1 - P2 : %2d - %2d",*(game->p1),*(game->p2));
+  game->board.score.surface = TTF_RenderText_Blended(game->board.police, p1_p2, GREEN);
+  game->board.score.position.x = 10;
+  game->board.score.position.y = game->board.board.surface->h/2 - game->board.score.surface->h/2;
+  
   /****************************************/
 
   SDL_FillRect(game->table.table.surface, NULL, SDL_MapRGBA(game->table.table.surface ->format, 0, 0, 0, 0));
@@ -130,6 +136,8 @@ int display(void * data)
   SDL_FillRect(game->table.topline.surface, NULL, SDL_MapRGBA(game->table.topline.surface->format, 15, 15, 15, 0));
   SDL_FillRect(game->table.bottomline.surface, NULL, SDL_MapRGBA(game->table.bottomline.surface->format, 15, 15, 15, 0));
  
+  SDL_BlitSurface(game->table.ball.surface,       NULL, game->table.table.surface, &game->table.ball.position); 
+  SDL_BlitSurface(game->table.rack1.surface,      NULL, game->table.table.surface, &game->table.rack1.position);
   SDL_BlitSurface(game->table.rightline.surface,    NULL, game->table.table.surface, &game->table.rightline.position);
   SDL_BlitSurface(game->table.leftline.surface,    NULL, game->table.table.surface, &game->table.leftline.position);
   SDL_BlitSurface(game->table.topline.surface,       NULL, game->table.table.surface, &game->table.topline.position);
@@ -140,22 +148,25 @@ int display(void * data)
  
   SDL_SemTryWait(semRead); /* +++++++++++++++++++++++++++++++ */
 
-  SDL_BlitSurface(game->table.ball.surface,       NULL, game->table.table.surface, &game->table.ball.position); 
-  SDL_BlitSurface(game->table.rack1.surface,      NULL, game->table.table.surface, &game->table.rack1.position);
-  SDL_BlitSurface(game->table.rack2.surface,      NULL, game->table.table.surface, &game->table.rack2.position);
-
-  sprintf(p1_p2,"P1 - P2 : %2d - %2d",*(game->p1),*(game->p2));
-  game->board.score.surface = TTF_RenderText_Blended(game->board.police, p1_p2, GREEN);
-  game->board.score.position.x = 10;
-  game->board.score.position.y = game->board.board.surface->h/2 - game->board.score.surface->h/2;   
-
+    if(game->buffer.count > 0)
+    {
+       game->table.rack2.position = game->buffer.head->position;
+              
+       game->buffer.head=game->buffer.head->next;
+       game->buffer.count--;
+    }
+  
   SDL_SemPost(semWrite); /* +++++++++++++++++++++++++++++++ */
+
+  SDL_BlitSurface(game->table.rack2.surface,      NULL, game->table.table.surface, &game->table.rack2.position);
 
   SDL_BlitSurface(game->board.score.surface,      NULL, game->board.board.surface,   &game->board.score.position);
   SDL_BlitSurface(game->board.board.surface,      NULL, game->screen,  &game->board.board.position); 	      
   SDL_BlitSurface(game->table.table.surface,    NULL, game->screen,  &game->table.table.position);
   SDL_Flip(game->screen);
  }
+ 
+ return 1; 
 } 
  
  

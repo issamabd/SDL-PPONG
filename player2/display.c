@@ -1,8 +1,8 @@
 #include <SDL/SDL_image.h> // IMG_Load()
 
 #include "display.h" 
+#include "buffer.h"
 
-extern PPong_FIFO fifo1;
 extern SDL_sem * semWrite1, * semRead1;  
 
 int create_game_graphicItems(PPong_Game * game)
@@ -144,14 +144,22 @@ int display(void * data)
   
  SDL_SemTryWait(semRead1); /* +++++++++++++++++++++++++++++++ */
 
-  if(fifo1.count > 0)
+  if(game->buffer1.count > 0)
   {
-       game->table.ball.position = fifo1.head->position;
+       game->table.ball.position = game->buffer1.head->position;
               
-       fifo1.head=fifo1.head->next;
-       fifo1.count--;
+       game->buffer1.head=game->buffer1.head->next;
+       game->buffer1.count--;
   }
-
+  
+  if(game->buffer2.count > 0)
+  {
+       game->table.rack1.position = game->buffer2.head->position;
+              
+       game->buffer2.head=game->buffer2.head->next;
+       game->buffer2.count--;
+  }
+  
  SDL_SemPost(semWrite1);  /* +++++++++++++++++++++++++++++++ */ 
    
   SDL_BlitSurface(game->table.ball.surface,       NULL, game->table.table.surface, &game->table.ball.position); 

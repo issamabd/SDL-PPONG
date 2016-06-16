@@ -94,6 +94,8 @@ if(!ip || !port)
 if(!SDLlibs_init())
 	exit(EXIT_FAILURE);
 
+ initialise_Buffer (&game.buffer); 
+
 /* graphic Interface creation */
 game.screen     = SDL_SetVideoMode(660, 700, BITBIXEL,
             SDL_HWSURFACE | SDL_DOUBLEBUF /*| SDL_FULLSCREEN*/);
@@ -192,6 +194,8 @@ while(play)
     shutdown(csock, SHUT_RDWR);
     closesocket(ssock);
 
+    free_Buffer(&game.buffer);
+    
     return EXIT_SUCCESS;
 }
 
