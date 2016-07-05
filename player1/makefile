@@ -1,26 +1,28 @@
 RM = rm -fv
-OBJECT = main.o display.o net.o moveball.o buffer.o
-LDFLAGS = -Wall -lSDL -lSDLmain -lSDL_ttf -lSDL_image -lSDL_mixer
+OBJECT = main.o display.o moveball.o player1_rpc_server.o player2_rpc_clnt.o player1_rpc_svc.o
+LDFLAGS = -Wall -lSDL -lSDLmain -lSDL_ttf -lSDL_image -lSDL_mixer -lnsl
 CC = gcc
 
 player1: $(OBJECT)
 	$(CC) -o player1 $(OBJECT) $(LDFLAGS) 
 
-main.o: main.c display.h game.h buffer.h net.h moveball.h
+main.o: main.c display.h game.h moveball.h player1_rpc.h player2_rpc.h
 	$(CC) -c main.c
 
-moveball.o: moveball.c moveball.h game.h buffer.h
+moveball.o: moveball.c moveball.h game.h
 	$(CC) -c moveball.c
 
-display.o: display.c game.h display.h buffer.h
+display.o: display.c game.h display.h
 	$(CC) -c display.c
 	
-net.o: net.c game.h net.h
-	$(CC) -c net.c
-
+player1_rpc_server.o: player1_rpc_server.c player1_rpc.h
+	$(CC) -c player1_rpc_server.c
 	
-buffer.o: buffer.c buffer.h
-	$(CC) -c buffer.c
+player2_rpc_clnt.o: player2_rpc_clnt.c player2_rpc.h
+	$(CC) -c player2_rpc_clnt.c
+	
+player1_rpc_svc.o: player1_rpc_svc.c 
+	$(CC) -c player1_rpc_svc.c
 	
 clean: 
 	$(RM) $(OBJECT)

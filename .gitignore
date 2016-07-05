@@ -13,5 +13,12 @@ player1/*~
 player2/*~
 
 
+player1/rpc/*.c
+player1/rpc/*.h
 
+player2/rpc/*.c
+player2/rpc/*.h
+
+player1/rpc/Makefile.player1_rpc
+player2/rpc/Makefile.player2_rpc
 

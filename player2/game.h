@@ -4,8 +4,6 @@
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_mixer.h>
 
-#include "buffer.h"
-
 #define RSPEED        5   
 #define BSPEED        8 
 #define VOLUME      100 	/* Volume 0..128 */
@@ -43,7 +41,6 @@ typedef struct Game
     Mix_Chunk * rack_hit;
     Mix_Chunk * touchline_hit;
     int * play, * p1, * p2;
-    PPong_Buffer buffer1, buffer2;
 }PPong_Game;
 
 #endif // GAME_H
